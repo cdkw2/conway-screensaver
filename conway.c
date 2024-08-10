@@ -2,11 +2,15 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <time.h>
+#include <string.h>
 
 #define MAX_AGE 5
 #define CELL_CHAR "&"
+#define GLIDER_INTERVAL 3
 
 int WIDTH, HEIGHT;
+int infinite_mode = 0;
+time_t last_glider_time;
 
 typedef struct {
     int alive;
@@ -51,6 +55,23 @@ int count_neighbors(Cell **grid, int x, int y) {
     return count;
 }
 
+void spawn_glider(Cell **grid, int x, int y) {
+    int glider[3][3] = {
+        {0, 1, 0},
+        {0, 0, 1},
+        {1, 1, 1}
+    };
+    
+    for (int dy = 0; dy < 3; dy++) {
+        for (int dx = 0; dx < 3; dx++) {
+            int nx = (x + dx) % WIDTH;
+            int ny = (y + dy) % HEIGHT;
+            grid[ny][nx].alive = glider[dy][dx];
+            grid[ny][nx].age = 0;
+        }
+    }
+}
+
 void update_grid(Cell **grid, Cell **new_grid) {
     for (int y = 0; y < HEIGHT; y++) {
         for (int x = 0; x < WIDTH; x++) {
@@ -64,7 +85,14 @@ void update_grid(Cell **grid, Cell **new_grid) {
             }
         }
     }
-
+    
+    if (infinite_mode && difftime(time(NULL), last_glider_time) >= GLIDER_INTERVAL) {
+        int rx = rand() % WIDTH;
+        int ry = rand() % HEIGHT;
+        spawn_glider(new_grid, rx, ry);
+        last_glider_time = time(NULL);
+    }
+    
     for (int y = 0; y < HEIGHT; y++) {
         for (int x = 0; x < WIDTH; x++) {
             grid[y][x] = new_grid[y][x];
@@ -72,16 +100,18 @@ void update_grid(Cell **grid, Cell **new_grid) {
     }
 }
 
-int main() {
-    srand(time(NULL));
+int main(int argc, char *argv[]) {
+    if (argc > 1 && strcmp(argv[1], "--infinite") == 0) {
+        infinite_mode = 1;
+    }
 
+    srand(time(NULL));
     initscr();
     cbreak();
     noecho();
     keypad(stdscr, TRUE);
     curs_set(0);
     timeout(0);
-
     start_color();
     use_default_colors();
     init_pair(1, COLOR_RED, -1);
@@ -91,7 +121,6 @@ int main() {
     init_pair(5, COLOR_BLUE, -1);
 
     getmaxyx(stdscr, HEIGHT, WIDTH);
-
     Cell **grid = malloc(HEIGHT * sizeof(Cell *));
     Cell **new_grid = malloc(HEIGHT * sizeof(Cell *));
     for (int i = 0; i < HEIGHT; i++) {
@@ -100,13 +129,12 @@ int main() {
     }
 
     init_grid(grid);
+    last_glider_time = time(NULL);
 
     while (1) {
         print_grid(grid);
         update_grid(grid, new_grid);
-
         if (getch() == 'q') break;
-
         usleep(100000);
     }
 
@@ -116,7 +144,6 @@ int main() {
     }
     free(grid);
     free(new_grid);
-
     endwin();
     return 0;
 }
