@@ -53,4 +53,5 @@ In infinite mode, the simulation prevents equilibrium by introducing glider patt
 - [ ] Using unicode characters instead of "&"
 - [ ] Letting user control parameters like cell character, update speed, colors, etc.
 - [x] Adding colors
+- [ ] Config file system
 - [ ] Others...
