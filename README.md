@@ -21,15 +21,15 @@ This project is an implementation of Conway's Game of Life, a cellular automaton
 
 To compile the program, use the following command:
 ```
-gcc -o gol gol.c -lncurses
+gcc -o conway conway.c -lncurses
 ```
 Run the program with:
 ```
-./gol
+./conway
 ```
 For infinite mode with periodic glider spawning:
 ```
-./gol --infinite
+./conway --infinite
 ```
 
 The simulation will start automatically. Press 'q' to quit the program.
