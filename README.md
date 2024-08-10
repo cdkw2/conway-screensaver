@@ -40,4 +40,5 @@ The simulation will start automatically. Press 'q' to quit the program.
 - [ ] Making this infinite because it gets to an endless loop of same actions after a while
 - [ ] Using unicode instead of "&"
 - [ ] Letting user give control like the character to choose, time between actions, color and etc
+- [*] Adding colors
 - [ ] Others...
