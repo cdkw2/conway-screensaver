@@ -1,5 +1,5 @@
 
-# Conway's Game of Life (Terminal saver)
+# Conway's Game of Life (Terminal screensaver)
 
 This project is an enhanced implementation of Conway's Game of Life, a cellular automaton simulation, using the ncurses library in C. It now includes a configuration file system for easy customization.
 
