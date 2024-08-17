@@ -3,13 +3,12 @@
 #include <unistd.h>
 #include <time.h>
 #include <string.h>
+#include <stdio.h>
 
-#define MAX_AGE 5
-#define CELL_CHAR "&"
-#define GLIDER_INTERVAL 3
+#define CONFIG_FILE "game_of_life.conf"
+#define MAX_COLORS 8
 
 int WIDTH, HEIGHT;
-int infinite_mode = 0;
 time_t last_glider_time;
 
 typedef struct {
@@ -17,10 +16,56 @@ typedef struct {
     int age;
 } Cell;
 
+typedef struct {
+    int infinite_mode;
+    int update_interval;
+    char cell_char[8];
+    int max_age;
+    int color_mode;
+    int glider_interval;
+    float initial_density;
+    int wrap_edges;
+} Config;
+
+Config config;
+
+void load_config() {
+    FILE *file = fopen(CONFIG_FILE, "r");
+    if (file == NULL) {
+        config.infinite_mode = 0;
+        config.update_interval = 100000;
+        strcpy(config.cell_char, "&");
+        config.max_age = 5;
+        config.color_mode = 1;
+        config.glider_interval = 3;
+        config.initial_density = 0.2;
+        config.wrap_edges = 1;
+        return;
+    }
+
+    char line[256];
+    while (fgets(line, sizeof(line), file)) {
+        char *key = strtok(line, "=");
+        char *value = strtok(NULL, "\n");
+        if (key && value) {
+            if (strcmp(key, "infinite_mode") == 0) config.infinite_mode = atoi(value);
+            else if (strcmp(key, "update_interval") == 0) config.update_interval = atoi(value);
+            else if (strcmp(key, "cell_char") == 0) strncpy(config.cell_char, value, 7);
+            else if (strcmp(key, "max_age") == 0) config.max_age = atoi(value);
+            else if (strcmp(key, "color_mode") == 0) config.color_mode = atoi(value);
+            else if (strcmp(key, "glider_interval") == 0) config.glider_interval = atoi(value);
+            else if (strcmp(key, "initial_density") == 0) config.initial_density = atof(value);
+            else if (strcmp(key, "wrap_edges") == 0) config.wrap_edges = atoi(value);
+        }
+    }
+
+    fclose(file);
+}
+
 void init_grid(Cell **grid) {
     for (int y = 0; y < HEIGHT; y++) {
         for (int x = 0; x < WIDTH; x++) {
-            grid[y][x].alive = (rand() % 5 == 0);
+            grid[y][x].alive = (rand() / (float)RAND_MAX < config.initial_density);
             grid[y][x].age = 0;
         }
     }
@@ -30,16 +75,19 @@ void print_grid(Cell **grid) {
     for (int y = 0; y < HEIGHT; y++) {
         for (int x = 0; x < WIDTH; x++) {
             if (grid[y][x].alive) {
-                int color = grid[y][x].age % MAX_AGE + 1;
-                attron(COLOR_PAIR(color));
-                mvaddstr(y, x, CELL_CHAR);
-                attroff(COLOR_PAIR(color));
+                if (config.color_mode) {
+                    int color = (grid[y][x].age % config.max_age) + 1;
+                    attron(COLOR_PAIR(color));
+                    mvaddstr(y, x, config.cell_char);
+                    attroff(COLOR_PAIR(color));
+                } else {
+                    mvaddstr(y, x, config.cell_char);
+                }
             } else {
                 mvaddch(y, x, ' ');
             }
         }
     }
-    refresh();
 }
 
 int count_neighbors(Cell **grid, int x, int y) {
@@ -47,8 +95,14 @@ int count_neighbors(Cell **grid, int x, int y) {
     for (int dy = -1; dy <= 1; dy++) {
         for (int dx = -1; dx <= 1; dx++) {
             if (dx == 0 && dy == 0) continue;
-            int nx = (x + dx + WIDTH) % WIDTH;
-            int ny = (y + dy + HEIGHT) % HEIGHT;
+            int nx = x + dx;
+            int ny = y + dy;
+            if (config.wrap_edges) {
+                nx = (nx + WIDTH) % WIDTH;
+                ny = (ny + HEIGHT) % HEIGHT;
+            } else {
+                if (nx < 0 || nx >= WIDTH || ny < 0 || ny >= HEIGHT) continue;
+            }
             if (grid[ny][nx].alive) count++;
         }
     }
@@ -86,25 +140,17 @@ void update_grid(Cell **grid, Cell **new_grid) {
         }
     }
     
-    if (infinite_mode && difftime(time(NULL), last_glider_time) >= GLIDER_INTERVAL) {
+    if (config.infinite_mode && difftime(time(NULL), last_glider_time) >= config.glider_interval) {
         int rx = rand() % WIDTH;
         int ry = rand() % HEIGHT;
         spawn_glider(new_grid, rx, ry);
         last_glider_time = time(NULL);
     }
-    
-    for (int y = 0; y < HEIGHT; y++) {
-        for (int x = 0; x < WIDTH; x++) {
-            grid[y][x] = new_grid[y][x];
-        }
-    }
 }
 
-int main(int argc, char *argv[]) {
-    if (argc > 1 && strcmp(argv[1], "--infinite") == 0) {
-        infinite_mode = 1;
-    }
-
+int main() {
+    load_config();
+    
     srand(time(NULL));
     initscr();
     cbreak();
@@ -114,30 +160,46 @@ int main(int argc, char *argv[]) {
     timeout(0);
     start_color();
     use_default_colors();
-    init_pair(1, COLOR_RED, -1);
-    init_pair(2, COLOR_YELLOW, -1);
-    init_pair(3, COLOR_GREEN, -1);
-    init_pair(4, COLOR_CYAN, -1);
-    init_pair(5, COLOR_BLUE, -1);
+
+    for (int i = 1; i <= MAX_COLORS; i++) {
+        init_pair(i, i, -1);
+    }
 
     getmaxyx(stdscr, HEIGHT, WIDTH);
+    
     Cell **grid = malloc(HEIGHT * sizeof(Cell *));
     Cell **new_grid = malloc(HEIGHT * sizeof(Cell *));
     for (int i = 0; i < HEIGHT; i++) {
         grid[i] = malloc(WIDTH * sizeof(Cell));
         new_grid[i] = malloc(WIDTH * sizeof(Cell));
     }
-
+    
     init_grid(grid);
     last_glider_time = time(NULL);
-
+    
+    int generation = 0;
     while (1) {
         print_grid(grid);
-        update_grid(grid, new_grid);
-        if (getch() == 'q') break;
-        usleep(100000);
-    }
+        mvprintw(HEIGHT, 0, "Generation: %d | Press 'q' to quit, 'r' to reset", generation);
+        refresh();
 
+        update_grid(grid, new_grid);
+
+        Cell **temp = grid;
+        grid = new_grid;
+        new_grid = temp;
+
+        generation++;
+
+        int ch = getch();
+        if (ch == 'q') break;
+        else if (ch == 'r') {
+            init_grid(grid);
+            generation = 0;
+        }
+        usleep(config.update_interval);
+    }
+    
     for (int i = 0; i < HEIGHT; i++) {
         free(grid[i]);
         free(new_grid[i]);
