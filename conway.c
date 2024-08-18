@@ -4,6 +4,8 @@
 #include <time.h>
 #include <string.h>
 #include <stdio.h>
+#include <libgen.h>
+#include <linux/limits.h>
 
 #define CONFIG_FILE "game_of_life.conf"
 #define MAX_COLORS 8
@@ -29,8 +31,23 @@ typedef struct {
 
 Config config;
 
+char config_path[PATH_MAX];
+
+void get_config_path() {
+    char exe_path[PATH_MAX];
+    ssize_t len = readlink("/proc/self/exe", exe_path, sizeof(exe_path) - 1);
+    if (len != -1) {
+        exe_path[len] = '\0';
+        char *dir = dirname(exe_path);
+        snprintf(config_path, sizeof(config_path), "%s/%s", dir, CONFIG_FILE);
+    } else {
+        strcpy(config_path, CONFIG_FILE);
+    }
+}
+
 void load_config() {
-    FILE *file = fopen(CONFIG_FILE, "r");
+    get_config_path();
+    FILE *file = fopen(config_path, "r");
     if (file == NULL) {
         config.infinite_mode = 0;
         config.update_interval = 100000;
