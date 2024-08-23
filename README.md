@@ -24,11 +24,14 @@ This project is an enhanced implementation of Conway's Game of Life, a cellular 
 ## Usage
 
 Compile and run the program with these commands:
-```
-gcc -o conway conway.c -lncurses
-chmod +x conway
+
+```bash
+git clone https://github.com/cdkw2/conway-screensaver
+cd conway-screensaver/
+make
 ./conway
 ```
+
 The simulation will start automatically. Press 'q' to quit the program, or 'r' to reset the grid.
 Make a alias on your .bashrc or whatever file to run it anywhere.
 
@@ -64,8 +67,6 @@ In infinite mode, the simulation prevents equilibrium by introducing glider patt
 
 ## Future Ideas
 
-- [x] Making this infinite to prevent endless loops of same actions
-- [x] Using unicode characters instead of "&"
 - [x] Letting user control parameters like cell character, update speed, colors, etc.
 - [x] Adding colors
 - [x] Config file system
