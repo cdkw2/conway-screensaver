@@ -6,12 +6,9 @@
 #include <stdio.h>
 #include <libgen.h>
 #include <linux/limits.h>
-#include <locale.h>
-#include <wchar.h>
 
 #define CONFIG_FILE "game_of_life.conf"
 #define MAX_COLORS 8
-#define CELL_CHAR_MAX 8
 
 int WIDTH, HEIGHT;
 time_t last_glider_time;
@@ -24,7 +21,7 @@ typedef struct {
 typedef struct {
     int infinite_mode;
     int update_interval;
-    wchar_t cell_char[CELL_CHAR_MAX];
+    char cell_char[8];
     int max_age;
     int color_mode;
     int glider_interval;
@@ -54,7 +51,7 @@ void load_config() {
     if (file == NULL) {
         config.infinite_mode = 0;
         config.update_interval = 100000;
-        wcsncpy(config.cell_char, L"■", CELL_CHAR_MAX - 1);
+        strcpy(config.cell_char, "&");
         config.max_age = 5;
         config.color_mode = 1;
         config.glider_interval = 3;
@@ -70,10 +67,7 @@ void load_config() {
         if (key && value) {
             if (strcmp(key, "infinite_mode") == 0) config.infinite_mode = atoi(value);
             else if (strcmp(key, "update_interval") == 0) config.update_interval = atoi(value);
-            else if (strcmp(key, "cell_char") == 0) {
-                mbstowcs(config.cell_char, value, CELL_CHAR_MAX - 1);
-                config.cell_char[CELL_CHAR_MAX - 1] = L'\0';
-            }
+            else if (strcmp(key, "cell_char") == 0) strncpy(config.cell_char, value, 7);
             else if (strcmp(key, "max_age") == 0) config.max_age = atoi(value);
             else if (strcmp(key, "color_mode") == 0) config.color_mode = atoi(value);
             else if (strcmp(key, "glider_interval") == 0) config.glider_interval = atoi(value);
@@ -101,10 +95,10 @@ void print_grid(Cell **grid) {
                 if (config.color_mode) {
                     int color = (grid[y][x].age % config.max_age) + 1;
                     attron(COLOR_PAIR(color));
-                    mvaddwstr(y, x, config.cell_char);
+                    mvaddstr(y, x, config.cell_char);
                     attroff(COLOR_PAIR(color));
                 } else {
-                    mvaddwstr(y, x, config.cell_char);
+                    mvaddstr(y, x, config.cell_char);
                 }
             } else {
                 mvaddch(y, x, ' ');
@@ -138,7 +132,7 @@ void spawn_glider(Cell **grid, int x, int y) {
         {0, 0, 1},
         {1, 1, 1}
     };
-
+    
     for (int dy = 0; dy < 3; dy++) {
         for (int dx = 0; dx < 3; dx++) {
             int nx = (x + dx) % WIDTH;
@@ -162,7 +156,7 @@ void update_grid(Cell **grid, Cell **new_grid) {
             }
         }
     }
-
+    
     if (config.infinite_mode && difftime(time(NULL), last_glider_time) >= config.glider_interval) {
         int rx = rand() % WIDTH;
         int ry = rand() % HEIGHT;
@@ -172,9 +166,8 @@ void update_grid(Cell **grid, Cell **new_grid) {
 }
 
 int main() {
-    setlocale(LC_CTYPE, ""); // Set locale for wide character support
     load_config();
-
+    
     srand(time(NULL));
     initscr();
     cbreak();
@@ -190,17 +183,17 @@ int main() {
     }
 
     getmaxyx(stdscr, HEIGHT, WIDTH);
-
+    
     Cell **grid = malloc(HEIGHT * sizeof(Cell *));
     Cell **new_grid = malloc(HEIGHT * sizeof(Cell *));
     for (int i = 0; i < HEIGHT; i++) {
         grid[i] = malloc(WIDTH * sizeof(Cell));
         new_grid[i] = malloc(WIDTH * sizeof(Cell));
     }
-
+    
     init_grid(grid);
     last_glider_time = time(NULL);
-
+    
     int generation = 0;
     while (1) {
         print_grid(grid);
@@ -223,7 +216,7 @@ int main() {
         }
         usleep(config.update_interval);
     }
-
+    
     for (int i = 0; i < HEIGHT; i++) {
         free(grid[i]);
         free(new_grid[i]);
