@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -pedantic -std=c99
+CFLAGS = -Wall -Wextra -pedantic -std=gnu99
 LDFLAGS = -lncurses -lm
 
 SRC = conway.c
