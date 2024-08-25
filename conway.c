@@ -6,14 +6,9 @@
 #include <stdio.h>
 #include <libgen.h>
 #include <linux/limits.h>
-#include <stdint.h>
-#include <stdbool.h>
-#include <locale.h>
-#include <wchar.h>
 
 #define CONFIG_FILE "game_of_life.conf"
 #define MAX_COLORS 8
-#define HISTORY_SIZE 1000
 
 int WIDTH, HEIGHT;
 time_t last_glider_time;
@@ -26,7 +21,7 @@ typedef struct {
 typedef struct {
     int infinite_mode;
     int update_interval;
-    wchar_t cell_char[16]; // Increased size to accommodate Unicode characters
+    char cell_char[8];
     int max_age;
     int color_mode;
     int glider_interval;
@@ -35,12 +30,8 @@ typedef struct {
 } Config;
 
 Config config;
+
 char config_path[PATH_MAX];
-typedef struct {
-    uint64_t hash;
-} GridHistory;
-GridHistory history[HISTORY_SIZE];
-int history_index = 0;
 
 void get_config_path() {
     char exe_path[PATH_MAX];
@@ -60,7 +51,7 @@ void load_config() {
     if (file == NULL) {
         config.infinite_mode = 0;
         config.update_interval = 100000;
-        wcscpy(config.cell_char, L"■"); // Default to a Unicode block character
+        strcpy(config.cell_char, "&");
         config.max_age = 5;
         config.color_mode = 1;
         config.glider_interval = 3;
@@ -76,10 +67,7 @@ void load_config() {
         if (key && value) {
             if (strcmp(key, "infinite_mode") == 0) config.infinite_mode = atoi(value);
             else if (strcmp(key, "update_interval") == 0) config.update_interval = atoi(value);
-            else if (strcmp(key, "cell_char") == 0) {
-                mbstowcs(config.cell_char, value, sizeof(config.cell_char) / sizeof(wchar_t) - 1);
-                config.cell_char[sizeof(config.cell_char) / sizeof(wchar_t) - 1] = L'\0';
-            }
+            else if (strcmp(key, "cell_char") == 0) strncpy(config.cell_char, value, 7);
             else if (strcmp(key, "max_age") == 0) config.max_age = atoi(value);
             else if (strcmp(key, "color_mode") == 0) config.color_mode = atoi(value);
             else if (strcmp(key, "glider_interval") == 0) config.glider_interval = atoi(value);
@@ -100,30 +88,6 @@ void init_grid(Cell **grid) {
     }
 }
 
-uint64_t hash_grid(Cell **grid) {
-    uint64_t hash = 5381;
-    for (int y = 0; y < HEIGHT; y++) {
-        for (int x = 0; x < WIDTH; x++) {
-            hash = ((hash << 5) + hash) + grid[y][x].alive;
-        }
-    }
-    return hash;
-}
-
-bool is_repeating_state(uint64_t current_hash) {
-    for (int i = 0; i < HISTORY_SIZE; i++) {
-        if (history[i].hash == current_hash) {
-            return true;
-        }
-    }
-    return false;
-}
-
-void add_to_history(uint64_t current_hash) {
-    history[history_index].hash = current_hash;
-    history_index = (history_index + 1) % HISTORY_SIZE;
-}
-
 void print_grid(Cell **grid) {
     for (int y = 0; y < HEIGHT; y++) {
         for (int x = 0; x < WIDTH; x++) {
@@ -131,10 +95,10 @@ void print_grid(Cell **grid) {
                 if (config.color_mode) {
                     int color = (grid[y][x].age % config.max_age) + 1;
                     attron(COLOR_PAIR(color));
-                    mvaddwstr(y, x, config.cell_char);
+                    mvaddstr(y, x, config.cell_char);
                     attroff(COLOR_PAIR(color));
                 } else {
-                    mvaddwstr(y, x, config.cell_char);
+                    mvaddstr(y, x, config.cell_char);
                 }
             } else {
                 mvaddch(y, x, ' ');
@@ -168,7 +132,7 @@ void spawn_glider(Cell **grid, int x, int y) {
         {0, 0, 1},
         {1, 1, 1}
     };
-
+    
     for (int dy = 0; dy < 3; dy++) {
         for (int dx = 0; dx < 3; dx++) {
             int nx = (x + dx) % WIDTH;
@@ -180,12 +144,6 @@ void spawn_glider(Cell **grid, int x, int y) {
 }
 
 void update_grid(Cell **grid, Cell **new_grid) {
-    uint64_t current_hash = hash_grid(grid);
-
-    if (config.infinite_mode && is_repeating_state(current_hash)) {
-        return; // Avoid processing if the state is repeating
-    }
-
     for (int y = 0; y < HEIGHT; y++) {
         for (int x = 0; x < WIDTH; x++) {
             int neighbors = count_neighbors(grid, x, y);
@@ -198,21 +156,18 @@ void update_grid(Cell **grid, Cell **new_grid) {
             }
         }
     }
-
+    
     if (config.infinite_mode && difftime(time(NULL), last_glider_time) >= config.glider_interval) {
         int rx = rand() % WIDTH;
         int ry = rand() % HEIGHT;
         spawn_glider(new_grid, rx, ry);
         last_glider_time = time(NULL);
     }
-
-    add_to_history(current_hash);
 }
 
 int main() {
-    setlocale(LC_CTYPE, ""); // Set locale for Unicode support
     load_config();
-
+    
     srand(time(NULL));
     initscr();
     cbreak();
@@ -228,17 +183,17 @@ int main() {
     }
 
     getmaxyx(stdscr, HEIGHT, WIDTH);
-
+    
     Cell **grid = malloc(HEIGHT * sizeof(Cell *));
     Cell **new_grid = malloc(HEIGHT * sizeof(Cell *));
     for (int i = 0; i < HEIGHT; i++) {
         grid[i] = malloc(WIDTH * sizeof(Cell));
         new_grid[i] = malloc(WIDTH * sizeof(Cell));
     }
-
+    
     init_grid(grid);
     last_glider_time = time(NULL);
-
+    
     int generation = 0;
     while (1) {
         print_grid(grid);
@@ -261,7 +216,7 @@ int main() {
         }
         usleep(config.update_interval);
     }
-
+    
     for (int i = 0; i < HEIGHT; i++) {
         free(grid[i]);
         free(new_grid[i]);
