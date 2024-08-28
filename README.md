@@ -1,29 +1,30 @@
+# Conway's Game of Life (Terminal Screensaver)
 
-# Conway's Game of Life (Terminal screensaver)
+![conway](assets/conway-screensaver.gif)
 
 This project is an enhanced implementation of Conway's Game of Life, a cellular automaton simulation, using the ncurses library in C. It now includes a configuration file system for easy customization.
 
 ## Features
 
-- Dynamic grid size that adjusts to the terminal window
-- Randomly initialized starting state with configurable density
-- Toroidal (wrapping) or bounded grid edges
-- Real-time visualization using ncurses
-- Color representation of cell age (optional)
-- Infinite mode with periodic glider spawning
-- Customizable cell character
-- Adjustable update speed
-- Configuration file for easy customization
+- **Dynamic Grid Size**: Automatically adjusts to the terminal window dimensions.
+- **Random Initialization**: The starting state is randomly generated with a configurable density of live cells.
+- **Grid Edges**: Supports both toroidal (wrapping) and bounded edges.
+- **Real-Time Visualization**: Utilizes ncurses for smooth updates and rendering.
+- **Color Representation**: Optionally displays cell age using different colors.
+- **Infinite Mode**: Introduces periodic glider patterns to maintain activity on the grid.
+- **Customizable Cell Character**: Users can define which character represents live cells.
+- **Adjustable Update Speed**: The speed of the simulation can be modified.
+- **Configuration File**: A dedicated file (`game_of_life.conf`) allows for easy customization of settings.
 
 ## Requirements
 
-- C compiler (e.g., gcc)
-- ncurses library
-- UNIX-like operating system (Linux, macOS, etc.)
+- A C compiler (e.g., gcc)
+- The ncurses library
+- A UNIX-like operating system (Linux, macOS, etc.)
 
 ## Usage
 
-Compile and run the program with these commands:
+To compile and run the program, execute the following commands:
 
 ```bash
 git clone https://github.com/cdkw2/conway-screensaver
