@@ -64,11 +64,12 @@ wrap_edges=1
 
 ## Infinite Mode
 
-In infinite mode, the simulation prevents equilibrium by introducing glider patterns at the specified interval, creating an ongoing screensaver and preventing the grid from settling into a static state.
+In infinite mode, the simulation continuously introduces glider patterns at specified intervals, preventing the grid from reaching a static state and ensuring ongoing activity.
 
 ## Future Ideas
 
-- [x] Letting user control parameters like cell character, update speed, colors, etc.
-- [x] Adding colors
-- [x] Config file system
-- [ ] Others...
+- [x] User controls for parameters like cell character, update speed, and colors.
+- [x] Additional features and optimizations to enhance user experience.
+- [x] Optimize the grid update logic to handle larger grids more efficiently. 
+
+This project offers a fun and interactive way to explore cellular automata through a terminal interface, making it not just a screensaver but also a tool for learning about complex systems.
