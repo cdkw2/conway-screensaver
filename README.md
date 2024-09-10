@@ -30,7 +30,7 @@ To compile and run the program, execute the following commands:
 git clone https://github.com/cdkw2/conway-screensaver
 cd conway-screensaver/
 make
-./conway
+./conway-screensaver.c
 ```
 
 The simulation will start automatically. Press 'q' to quit the program, or 'r' to reset the grid.
@@ -74,4 +74,4 @@ In infinite mode, the simulation continuously introduces glider patterns at spec
 
 This project offers a fun and interactive way to explore cellular automata through a terminal interface, making it not just a screensaver but also a tool for learning about complex systems.
 
-Version 1.0.0
+Version 1.0.1
