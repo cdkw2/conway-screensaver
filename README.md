@@ -73,3 +73,5 @@ In infinite mode, the simulation continuously introduces glider patterns at spec
 - [x] Optimize the grid update logic to handle larger grids more efficiently. 
 
 This project offers a fun and interactive way to explore cellular automata through a terminal interface, making it not just a screensaver but also a tool for learning about complex systems.
+
+Version 1.0.0
