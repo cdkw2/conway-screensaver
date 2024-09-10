@@ -30,7 +30,26 @@ To compile and run the program, execute the following commands:
 git clone https://github.com/cdkw2/conway-screensaver
 cd conway-screensaver/
 make
-./conway-screensaver.c
+./conway-screensaver
+sudo make install    # To install it.
+make install-config    # To install the config file in to your ~/.config/conway-screensaver/
+```
+
+##### Arch Linux (AUR)
+
+```bash
+yay -S conway-screensaver
+```
+
+#### Void Linux (XBPS-SRC)
+
+Assuming you have [void-packages](https://github.com/void-linux/void-packages).
+```bash
+git clone https://github.com/elbachir-one/void-templates
+cp -r void-templates/conway-screensaver void-packages/srcpkgs/   # Copying the gols directory that has the template.
+cd void-packages/
+./xbps-src pkg conway-screensaver    # To build conway-screensaver
+sudo xbps-install -R hostdir/binpkgs conway-screensaver    # Installing conway-screensaver
 ```
 
 The simulation will start automatically. Press 'q' to quit the program, or 'r' to reset the grid.
@@ -38,7 +57,7 @@ Make a alias on your .bashrc or whatever file to run it anywhere.
 
 ## Configuration
 
-The program uses a configuration file named `game_of_life.conf`in same directory. Explanation of each configuration variable:
+The program uses a configuration file named `game_of_life.conf` that would present in `~/.config/conway-screensaver/` if you installed it. Explanation of each configuration variable:
 
 - `infinite_mode`: (0 or 1) Enables or disables infinite mode.
 - `update_interval`: (microseconds) Controls the speed of the simulation.
