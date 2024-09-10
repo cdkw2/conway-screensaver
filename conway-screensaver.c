@@ -41,7 +41,8 @@ void get_config_path() {
     if (len != -1) {
         exe_path[len] = '\0';
         char *dir = dirname(exe_path);
-        snprintf(config_path, sizeof(config_path), "%s/%s", dir, CONFIG_FILE);
+        (void)dir;
+        snprintf(config_path, sizeof(config_path), "%s/.config/conway-screensaver/%s", getenv("HOME"), CONFIG_FILE);
     } else {
         strcpy(config_path, CONFIG_FILE);
     }

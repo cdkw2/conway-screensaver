@@ -1,4 +1,4 @@
 test/
-conway
-conway.o
+conway-screensaver
+*.o
 aur-stuff/

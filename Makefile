@@ -14,7 +14,22 @@ $(EXEC): $(OBJ)
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
+install: all
+	install -Dm755 $(EXEC) /usr/bin/$(EXEC)
+	install -Dm644 game_of_life.conf /usr/share/doc/conway-screensaver/game_of_life.conf
+
+install-config:
+	mkdir -p ~/.config/conway-screensaver
+	cp /usr/share/doc/conway-screensaver/game_of_life.conf ~/.config/conway-screensaver/
+
+uninstall:
+	rm -f /usr/bin/$(EXEC)
+	rm -f /usr/share/doc/conway-screensaver/game_of_life.conf
+
+uninstall-config:
+	rm -f ~/.config/conway-screensaver/game_of_life.conf
+
 clean:
 	rm -f $(OBJ) $(EXEC)
 
-.PHONY: all clean
+.PHONY: all clean install install-config
