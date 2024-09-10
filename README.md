@@ -57,7 +57,8 @@ Make a alias on your .bashrc or whatever file to run it anywhere.
 
 ## Configuration
 
-The program uses a configuration file named `game_of_life.conf` that would present in `~/.config/conway-screensaver/` if you installed it. Explanation of each configuration variable:
+The program uses a configuration file named game_of_life.conf, which is located in ~/.config/conway-screensaver/ after installation.
+Below is an explanation of each configuration variable:
 
 - `infinite_mode`: (0 or 1) Enables or disables infinite mode.
 - `update_interval`: (microseconds) Controls the speed of the simulation.
