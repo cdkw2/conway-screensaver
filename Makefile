@@ -16,6 +16,7 @@ $(EXEC): $(OBJ)
 
 install: all
 	install -Dm755 $(EXEC) /usr/bin/$(EXEC)
+	install -Dm644 game_of_life.conf /usr/share/doc/conway-screensaver/game_of_life.conf
 
 install-config:
 	mkdir -p ~/.config/conway-screensaver
