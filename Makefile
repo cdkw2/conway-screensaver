@@ -2,9 +2,9 @@ CC = gcc
 CFLAGS = -Wall -Wextra -pedantic -D_GNU_SOURCE -std=gnu99
 LDFLAGS = -lncurses -lm
 
-SRC = conway.c
+SRC = conway-screensaver.c
 OBJ = $(SRC:.c=.o)
-EXEC = conway
+EXEC = conway-screensaver
 
 all: $(EXEC)
 
