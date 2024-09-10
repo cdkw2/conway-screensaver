@@ -94,4 +94,4 @@ In infinite mode, the simulation continuously introduces glider patterns at spec
 
 This project offers a fun and interactive way to explore cellular automata through a terminal interface, making it not just a screensaver but also a tool for learning about complex systems.
 
-Version 1.0.1
+Version 1.0.2
