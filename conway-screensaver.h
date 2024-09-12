@@ -12,6 +12,12 @@
 #define DEFAULT_INITIAL_DENSITY 0.2
 #define DEFAULT_WRAP_EDGES 1
 
+// Unique key bindings for user interaction
+#define MY_KEY_QUIT 'q'
+#define MY_KEY_RESET 'r'
+#define MY_KEY_SPEED_UP '+'
+#define MY_KEY_SLOW_DOWN '-'
+
 typedef struct {
     int infinite_mode;
     int update_interval;

@@ -224,7 +224,7 @@ void init_pattern(Cell **grid, const char *pattern) {
 
 int main() {
     setlocale(LC_ALL, "");
-    load_config();
+    load_default_config();
 
     srand(time(NULL));
     initscr();
@@ -261,7 +261,8 @@ int main() {
     while (1) {
         resize_grid(&grid, &new_grid);
         print_grid(grid);
-        mvprintw(HEIGHT, 0, "Generation: %d | Press 'q' to quit, 'r' to reset, '+' to speed up, '-' to slow down", generation);
+        mvprintw(HEIGHT, 0, "Generation: %d | Press '%c' to quit, '%c' to reset, '%c' to speed up, '%c' to slow down",
+                 generation, MY_KEY_QUIT, MY_KEY_RESET, MY_KEY_SPEED_UP, MY_KEY_SLOW_DOWN);
         refresh();
 
         update_grid(grid, new_grid);
@@ -273,13 +274,13 @@ int main() {
         generation++;
 
         int ch = getch();
-        if (ch == 'q') break;
-        else if (ch == 'r') {
+        if (ch == MY_KEY_QUIT) break;
+        else if (ch == MY_KEY_RESET) {
             init_grid(grid);
             generation = 0;
-        } else if (ch == '+') {
+        } else if (ch == MY_KEY_SPEED_UP) {
             config.update_interval = (int)fmax(1, config.update_interval - 10000);
-        } else if (ch == '-') {
+        } else if (ch == MY_KEY_SLOW_DOWN) {
             config.update_interval = (int)fmin(1000000, config.update_interval + 10000);
         }
         usleep(config.update_interval);
