@@ -8,6 +8,7 @@
 #include <linux/limits.h>
 #include <locale.h>
 #include <math.h>
+#include "conway-screensaver.h"
 
 #define CONFIG_FILE "game_of_life.conf"
 #define MAX_COLORS 8
@@ -19,17 +20,6 @@ typedef struct {
     int alive;
     int age;
 } Cell;
-
-typedef struct {
-    int infinite_mode;
-    int update_interval;
-    wchar_t cell_char[8];
-    int max_age;
-    int color_mode;
-    int glider_interval;
-    float initial_density;
-    int wrap_edges;
-} Config;
 
 Config config;
 
@@ -48,18 +38,22 @@ void get_config_path() {
     }
 }
 
+void load_default_config() {
+    config.infinite_mode = DEFAULT_INFINITE_MODE;
+    config.update_interval = DEFAULT_UPDATE_INTERVAL;
+    wcsncpy(config.cell_char, DEFAULT_CELL_CHAR, 8);
+    config.max_age = DEFAULT_MAX_AGE;
+    config.color_mode = DEFAULT_COLOR_MODE;
+    config.glider_interval = DEFAULT_GLIDER_INTERVAL;
+    config.initial_density = DEFAULT_INITIAL_DENSITY;
+    config.wrap_edges = DEFAULT_WRAP_EDGES;
+}
+
 void load_config() {
-    get_config_path();
+    get_config_path(); // Ensure this function is defined to set the config_path
     FILE *file = fopen(config_path, "r");
     if (file == NULL) {
-        config.infinite_mode = 0;
-        config.update_interval = 100000;
-        swprintf(config.cell_char, 8, L"");
-        config.max_age = 5;
-        config.color_mode = 1;
-        config.glider_interval = 5;
-        config.initial_density = 0.2;
-        config.wrap_edges = 1;
+        load_default_config();
         return;
     }
 
