@@ -224,7 +224,7 @@ void init_pattern(Cell **grid, const char *pattern) {
 
 int main() {
 	setlocale(LC_ALL, "");
-	load_default_config();
+	load_config();
 
 	srand(time(NULL));
 	initscr();
